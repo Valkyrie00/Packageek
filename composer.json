@@ -1,0 +1,23 @@
+{
+    "name": "valkyrie/packageek",
+    "description": "Cli for make packages",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Vito Castellano",
+            "email": "castellano.vito@gmail.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {
+        "illuminate/support": "~5",
+        "illuminate/console": "~5",
+        "illuminate/filesystem": "~5",
+        "guzzlehttp/guzzle": "^6.1@dev"
+    },
+    "autoload": {
+        "psr-4": {
+            "Valkyrie\\Packageek\\": "src/"
+        }
+    }
+}
