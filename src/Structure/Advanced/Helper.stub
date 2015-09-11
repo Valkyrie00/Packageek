@@ -1,0 +1,11 @@
+<?php
+
+namespace {{Uvendor}}\{{Uname}}\{{USname}};
+
+class {{USname}}
+{
+    public function get{{USname}}()
+    {
+        return "Hi! I'm {{USname}}";
+    }
+}

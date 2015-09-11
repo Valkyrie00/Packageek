@@ -1,0 +1,17 @@
+<?php
+namespace {{Uvendor}}\{{Uname}}\Facades;
+
+use Illuminate\Support\Facades\Facade as LFacade;
+
+class {{USname}} extends LFacade
+{
+    /**
+     * Name of the binding in the IoC container
+     *
+     * @return string
+     */
+    protected static function getFacadeAccessor()
+    {
+        return '{{Sname}}';
+    }
+}

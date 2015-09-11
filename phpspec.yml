@@ -1,0 +1,7 @@
+suites:
+    packageek_suite:
+        namespace: Valkyrie\Packageek
+        psr4_prefix: Valkyrie\Packageek
+        src_path: src
+        spec_path: test
+        spec_prefix: Packageek
