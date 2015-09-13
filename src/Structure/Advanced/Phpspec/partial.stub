@@ -1,0 +1,6 @@
+    {{Sname}}_suite:
+        namespace: {{Uvendor}}\{{Uname}}\{{USname}}
+        psr4_prefix: {{Uvendor}}\{{Uname}}\{{USname}}
+        src_path: src/{{USname}}
+        spec_path: test
+        spec_prefix: {{USname}}
