@@ -29,6 +29,7 @@ class PackageekServiceProvider extends ServiceProvider
      */
     public function boot()
     {
+        //
     }
 
    /**

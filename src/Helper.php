@@ -42,36 +42,80 @@ class Helper
         $file       = $this->file->get($oldFile);
         $replacing  = str_replace($search, $replace, $file);
         $this->file->append($newFile, $replacing);
-    }    
+    }
 
-    public function generateComponent($package_component, $advanced = false)
+    public function generateSimpleComponent($package_component)
     {
-        if($advanced === false){
-            $src_package_path = $this->generateSrcPackagePath($package_component);
-            
-            $file_name = ucfirst($package_component['package_name']);
+        $src_package_path   = $this->generateSrcPackagePath($package_component);
+        $file_name          = ucfirst($package_component['package_name']);
 
-            $service_path = $src_package_path;
-            $helper_path = $src_package_path;
-            $facade_path = $src_package_path;
-            
-            $data_search  = ['{{vendor}}', '{{name}}', '{{Uvendor}}', '{{Uname}}'];
-            $data_replace = [$package_component['vendor_name'], $package_component['package_name'], ucfirst($package_component['vendor_name']), ucfirst($package_component['package_name'])];
+        $service_path       = $src_package_path;
+        $helper_path        = $src_package_path;
+        $facade_path        = $src_package_path;
         
-            $structure = 'Simple';
-        }else{
+        $data_search  = [
+                            '{{vendor}}', 
+                            '{{name}}', 
+                            '{{Uvendor}}', 
+                            '{{Uname}}'
+                        ];
+        $data_replace = [
+                            $package_component['vendor_name'], 
+                            $package_component['package_name'], 
+                            ucfirst($package_component['vendor_name']), 
+                            ucfirst($package_component['package_name'])
+                        ];
+    
+        $structure    = 'Simple';
 
-            $file_name = ucfirst($package_component['sub_package_name']);
+        //****************************************
+        // Genero service Provider
+        //****************************************
+        $provider = $service_path.$file_name.'ServiceProvider.php';
+        $this->replaceAndSave(__DIR__.'/Structure/'.$structure.'/ServiceProvider.stub', $data_search, $data_replace, $provider);
 
-            $service_path = $package_component['package_folder'].'/'.$package_component['vendor_name'].'/'.$package_component['package_name'].'/src/'.ucfirst($package_component['sub_package_name']).'/';
-            $helper_path = $service_path;
-            $facade_path = $package_component['package_folder'].'/'.$package_component['vendor_name'].'/'.$package_component['package_name'].'/src/';
+        //****************************************
+        // Genero Helper
+        //****************************************
+        $helper = $helper_path.$file_name.'.php';
+        $this->replaceAndSave(__DIR__.'/Structure/'.$structure.'/Helper.stub', $data_search, $data_replace, $helper);
 
-            $data_search  = ['{{vendor}}', '{{name}}', '{{Uvendor}}', '{{Uname}}', '{{USname}}', '{{Sname}}'];
-            $data_replace = [$package_component['vendor_name'], $package_component['package_name'], ucfirst($package_component['vendor_name']), ucfirst($package_component['package_name']),  ucfirst($package_component['sub_package_name']), $package_component['sub_package_name']];
-        
-            $structure = 'Advanced';
-        }
+        //****************************************
+        // Genero Facade
+        //****************************************
+        $facade = $facade_path.'Facades/'.$file_name.'.php';
+        $this->replaceAndSave(__DIR__.'/Structure/'.$structure.'/Facade.stub', $data_search, $data_replace, $facade);
+
+        return true;
+    }
+
+    public function generateAdvancedComponent($package)
+    {
+
+        $file_name = ucfirst($package['sub_package_name']);
+
+        $service_path = $package['package_folder'].'/'.$package['vendor_name'].'/'.$package['package_name'].'/src/'.ucfirst($package['sub_package_name']).'/';
+        $helper_path = $service_path;
+        $facade_path = $package['package_folder'].'/'.$package['vendor_name'].'/'.$package['package_name'].'/src/';
+
+        $data_search  = [
+                            '{{vendor}}', 
+                            '{{name}}', 
+                            '{{Uvendor}}', 
+                            '{{Uname}}', 
+                            '{{USname}}', 
+                            '{{Sname}}'
+                        ];
+        $data_replace = [
+                            $package['vendor_name'], 
+                            $package['package_name'], 
+                            ucfirst($package['vendor_name']), 
+                            ucfirst($package['package_name']), 
+                            ucfirst($package['sub_package_name']), 
+                            $package['sub_package_name']
+                        ];
+    
+        $structure = 'Advanced';
 
         //****************************************
         // Genero service Provider
@@ -92,31 +136,58 @@ class Helper
         $this->replaceAndSave(__DIR__.'/Structure/'.$structure.'/Facade.stub', $data_search, $data_replace, $facade);
     }
 
-    public function generateSpecSuite($package_component, $advanced = false)
+    public function generateSimpleSpecSuite($package)
     {
-
-
-        $path_suite = $package_component['package_folder'].'/'.$package_component['vendor_name'].'/'.$package_component['package_name'].'/';
-
+        $path_suite = $package['package_folder'].'/'.$package['vendor_name'].'/'.$package['package_name'].'/';
         $this->makeDir($path_suite.'/test');
-
         $suite = $path_suite.'phpspec.yml';
+        $this->replaceAndSave(__DIR__.'/Structure/Advanced/Phpspec/base.stub', '', '', $suite);
 
-        if($advanced === true){
-            $this->replaceAndSave(__DIR__.'/Structure/Advanced/Phpspec/base.stub', '', '', $suite);   
+        $data_search  = [
+                            '{{vendor}}', 
+                            '{{name}}', 
+                            '{{Uvendor}}', 
+                            '{{Uname}}'
+                        ];
+        $data_replace = [
+                            $package['vendor_name'], 
+                            $package['package_name'], 
+                            ucfirst($package['vendor_name']), 
+                            ucfirst($package['package_name'])
+                        ];
 
-            foreach ($package_component['component'] as $v) {
-                $data_search  = ['{{vendor}}', '{{name}}', '{{Uvendor}}', '{{Uname}}', '{{USname}}', '{{Sname}}'];
-                $data_replace = [$package_component['vendor_name'], $package_component['package_name'], ucfirst($package_component['vendor_name']), ucfirst($package_component['package_name']),  ucfirst($v), $v];
-                $this->replaceAndConcatenate(__DIR__.'/Structure/Advanced/Phpspec/partial.stub', $data_search, $data_replace, $suite);   
-            }
-        }else{
-            $this->replaceAndSave(__DIR__.'/Structure/Advanced/Phpspec/base.stub', '', '', $suite);   
+        $this->replaceAndConcatenate(__DIR__.'/Structure/Simple/Phpspec/partial.stub', $data_search, $data_replace, $suite);   
+    }
 
-            $data_search  = ['{{vendor}}', '{{name}}', '{{Uvendor}}', '{{Uname}}'];
-            $data_replace = [$package_component['vendor_name'], $package_component['package_name'], ucfirst($package_component['vendor_name']), ucfirst($package_component['package_name'])];
-            $this->replaceAndConcatenate(__DIR__.'/Structure/Simple/Phpspec/partial.stub', $data_search, $data_replace, $suite);   
+    public function generateAdvancedSpecSuite($package)
+    {
+        $path_suite = $package['package_folder'].'/'.$package['vendor_name'].'/'.$package['package_name'].'/';
+        $this->makeDir($path_suite.'/test');
+        $suite = $path_suite.'phpspec.yml';
+        $this->replaceAndSave(__DIR__.'/Structure/Advanced/Phpspec/base.stub', '', '', $suite);   
+
+        foreach ($package['component'] as $v) {
+
+            $data_search  = [
+                                '{{vendor}}', 
+                                '{{name}}', 
+                                '{{Uvendor}}', 
+                                '{{Uname}}', 
+                                '{{USname}}', 
+                                '{{Sname}}'
+                            ];
+            $data_replace = [
+                                $package['vendor_name'], 
+                                $package['package_name'], 
+                                ucfirst($package['vendor_name']), 
+                                ucfirst($package['package_name']), 
+                                ucfirst($v), 
+                                $v
+                            ];
+
+            $this->replaceAndConcatenate(__DIR__.'/Structure/Advanced/Phpspec/partial.stub', $data_search, $data_replace, $suite);   
         }
+        
     }
 
     public function generatePackagePath($package_component)
@@ -138,42 +209,101 @@ class Helper
         return $path;
     }
 
-    public function generateComposer($package_component, $advanced = false)
+    public function generateSimpleComposer($package)
     {
-        //$package_path = $this->generatePackagePath($package);
-
-        if($advanced === true)
-        {
-            $spec = '';
-            $n = count($package_component['component']);
-            $i = 0;
-            foreach ($package_component['component'] as $value) {
-                $i++;
-                $spec .= "           \"".ucfirst($package_component['vendor_name'])."\\\\".ucfirst($package_component['package_name'])."\\\\".ucfirst($value)."\": \"src/\"";
-                if($i < $n)
-                {
-                    $spec .= ",\n";
-                }
-            }
-
-            $path = $package_component['package_folder'].'/'.$package_component['vendor_name'].'/'.$package_component['package_name'].'/';
-
-            $data_search  = ['{{vendor}}', '{{name}}', '{{Uvendor}}', '{{Uname}}', '{{spec}}'];
-            $data_replace = [$package_component['vendor_name'], $package_component['package_name'], ucfirst($package_component['vendor_name']), ucfirst($package_component['package_name']), $spec ];
+        $path = $this->generatePackagePath($package);
+        $structure = 'Simple';
         
-            $structure = 'Advanced';
-        }else{
-            $path = $this->generatePackagePath($package_component);
-            $structure = 'Simple';
-            
-            $spec = "           \"".ucfirst($package_component['vendor_name'])."\\\\".ucfirst($package_component['package_name'])."\": \"src/\"";
+        $spec = "           \"".ucfirst($package['vendor_name'])."\\\\".ucfirst($package['package_name'])."\": \"src/\"";
 
-            $data_search  = ['{{vendor}}', '{{name}}', '{{Uvendor}}', '{{Uname}}', '{{spec}}'];
-            $data_replace = [$package_component['vendor_name'], $package_component['package_name'], ucfirst($package_component['vendor_name']), ucfirst($package_component['package_name']), $spec ];
+        $data_search  = [
+                            '{{vendor}}', 
+                            '{{name}}', 
+                            '{{Uvendor}}', 
+                            '{{Uname}}', 
+                            '{{spec}}'
+                        ];
+        $data_replace = [
+                            $package['vendor_name'], 
+                            $package['package_name'], 
+                            ucfirst($package['vendor_name']), 
+                            ucfirst($package['package_name']), 
+                            $spec 
+                        ];
+        
+        $composer = $path.'composer.json';
+        $this->replaceAndSave(__DIR__.'/Structure/'.$structure.'/Composer.stub', $data_search, $data_replace, $composer);
+
+    }
+
+    public function generateAdvancedComposer($package)
+    {
+        $spec   = '';
+        $n      = count($package['component']);
+        $i      = 0;
+
+        foreach ($package['component'] as $value) {
+            $i++;
+            $spec .= "           \"".ucfirst($package['vendor_name'])."\\\\".ucfirst($package['package_name'])."\\\\".ucfirst($value)."\": \"src/\"";
+            if($i < $n)
+            {
+                $spec .= ",\n";
+            }
         }
+
+        $path         = $package['package_folder'].'/'.$package['vendor_name'].'/'.$package['package_name'].'/';
+        $structure = 'Advanced';
+        $data_search  = [
+                            '{{vendor}}', 
+                            '{{name}}', 
+                            '{{Uvendor}}', 
+                            '{{Uname}}', 
+                            '{{spec}}'
+                        ];
+        $data_replace = [
+                            $package['vendor_name'], 
+                            $package['package_name'], 
+                            ucfirst($package['vendor_name']), 
+                            ucfirst($package['package_name']), 
+                            $spec 
+                        ];
 
         $composer = $path.'composer.json';
         $this->replaceAndSave(__DIR__.'/Structure/'.$structure.'/Composer.stub', $data_search, $data_replace, $composer);
+    }
+
+    public function generateDirComponent($p)
+    {
+        $status = true;
+        $path = $p['package_folder'].'/'.$p['vendor_name'].'/'.$p['package_name'];
+
+        //****************************************
+        // Generate package folder
+        //****************************************
+        if($this->makeDir($path) === true)
+        {
+            //****************************************
+            // Generate src folder
+            //****************************************
+            if($this->makeDir($path.'/src') === true)
+            {
+                //****************************************
+                // Generte facades folder
+                //****************************************
+                if($this->makeDir($path.'/src/Facades') === true)
+                {
+                    $status = true;
+                }else{
+                    $status = false;
+                }
+            }else{
+                $status = false;
+            }
+        }else{
+            $status = false;
+        }
+
+        return $status;
     }
 
 

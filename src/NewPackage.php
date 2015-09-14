@@ -8,14 +8,15 @@ use Valkyrie\Packageek\Helper;
 class NewPackage extends Command
 {
 
-    protected $signature = "packageek:create";
-
+    protected $signature = "make:package";
+    protected $description = "Create a new package";
     protected $helper;
 
     public function __construct(Helper $helper)
     {
         parent::__construct();
         $this->helper = $helper;
+        $this->lang = require __DIR__.'/Lang/en.php';
     }
 
     public function handle()
@@ -28,7 +29,7 @@ class NewPackage extends Command
         //****************************************
         // Inizializzo cartella contenitore pacchetto
         //****************************************
-        $package_folder = $this->ask('Indicare la folder principale del pacchetto');
+        $package_folder = $this->ask($this->lang['ask1']);
         if($package_folder)
         {
             //****************************************
@@ -36,12 +37,12 @@ class NewPackage extends Command
             //****************************************
             $check_root_folder = $this->helper->fileExists($package_folder);
             if($check_root_folder === true){
-                $this->warn('Warning : Cartella già presente.');
+                $this->warn($this->lang['warning1']);
                 
                 //****************************************
                 // Verifico se si vuole creare il pacchetto nella cartella
                 //****************************************
-                $folder_confirm = $this->confirm('Vuoi creare il nuovo pacchetto al suo interno?');
+                $folder_confirm = $this->confirm($this->lang['confirm1']);
                 if($folder_confirm == 'y' || $folder_confirm == 'yes')
                 {
                     $this->getVendor($package_folder);
@@ -63,13 +64,15 @@ class NewPackage extends Command
         }
     }
 
-
+    //****************************************
+    // Step 1
+    //****************************************
     public function getVendor($package_folder)
     {
         //****************************************
         // Inizializzo nome del vendor
         //****************************************
-        $vendor_name = $this->ask('Indicare nome del vendor');
+        $vendor_name = $this->ask($this->lang['ask2']);
 
         //****************************************
         //Controllo se esite la cartella vendor
@@ -77,9 +80,8 @@ class NewPackage extends Command
         $check_vendor_name = $this->helper->fileExists($package_folder.'/'.$vendor_name);
         if($check_vendor_name === true)
         {
-            //TODO: creare un pacchetto all'intero dello stesso vendor
-            $this->warn('Warning : Vendor già presente.');
-            exit();
+            $this->warn($this->lang['warning2']);
+            $this->getVendor($package_folder);
         }
         else
         {
@@ -96,12 +98,15 @@ class NewPackage extends Command
         }
     }
 
+    //****************************************
+    // Step 2
+    //****************************************
     public function getPackage($package_folder, $vendor_name)
     {
         //****************************************
         // Inizializzo nome del pacchetto
         //****************************************
-        $package_name = $this->ask('Indicare nome del pacchetto');
+        $package_name = $this->ask($this->lang['ask3']);
 
         //****************************************
         // Controllo se esite la cartella del pacchetto
@@ -109,90 +114,98 @@ class NewPackage extends Command
         $check_package_name = $this->helper->fileExists($package_folder.'/'.$vendor_name.'/'.$package_name);
         if($check_package_name === false)
         {
+            $data = [
+                        'package_folder' => $package_folder,
+                        'vendor_name'    => $vendor_name,
+                        'package_name'   => $package_name
+                    ];
             //****************************************
-            // Creo cartella con il nome del pacchetto specificato
+            // Generate package folder, src folder and facades folder
             //****************************************
-            $this->helper->makeDir($package_folder.'/'.$vendor_name.'/'.$package_name);
-
-            //****************************************
-            // Creo cartella src
-            //****************************************
-            $this->helper->makeDir($package_folder.'/'.$vendor_name.'/'.$package_name.'/src');
-
-            //****************************************
-            // Creo cartella facades
-            //****************************************
-            $this->helper->makeDir($package_folder.'/'.$vendor_name.'/'.$package_name.'/src/Facades');
-
-            //****************************************
-            // Verifico se si vuole creare un pacchetto semplice o un pacchetto complesso
-            //****************************************
-            $choice_package_type = $this->choice('Quale tipologia di pacchetto vuoi costrutire? ', array('simple', 'advanced'));
-            if($choice_package_type == 'simple'){
-                $this->generateSimplePackage($package_folder, $vendor_name, $package_name);
-                $this->info('Fine Semplice!!');
+            if($this->helper->generateDirComponent($data) === true)
+            {
+                //****************************************
+                // Verifico se si vuole creare un pacchetto semplice o un pacchetto complesso
+                //****************************************
+                $choice_package_type = $this->choice($this->lang['choice1'], array('simple', 'advanced'));
+                if($choice_package_type == 'simple'){
+                    if($this->generateSimplePackage($data) === true)
+                    {
+                        $this->getFinish();
+                    }
+                }
+                if($choice_package_type == 'advanced'){
+                    if($this->generateAdvancedPackage($data) === true)
+                    {
+                        $this->getFinish();
+                    }
+                }
             }
-            if($choice_package_type == 'advanced'){
-                $this->generateAdvancedPackage($package_folder, $vendor_name, $package_name);
-                $this->info('Fine Advanced!!');
-            }
-            
         }
     }
 
-    public function generateSimplePackage($package_folder, $vendor_name, $package_name)
+    public function generateSimplePackage($package)
     {
-        $package_component = ['package_folder' => $package_folder, 'vendor_name' => $vendor_name, 'package_name' => $package_name];
+        //****************************************
+        // Generate composer
+        //****************************************
+        $this->helper->generateSimpleComposer($package);
 
         //****************************************
-        // Genero composer
+        // Generate component
         //****************************************
-        $this->helper->generateComposer($package_component, false);
-
+        $this->helper->generateSimpleComponent($package);
+        
         //****************************************
-        // Genero componenti
+        // Generate suite phpspec
         //****************************************
-        $this->helper->generateComponent($package_component, false);
-
-        $this->helper->generateSpecSuite($package_component, false);
+        $this->helper->generateSimpleSpecSuite($package);
 
         return true;
     }
 
-    public function generateAdvancedPackage($package_folder, $vendor_name, $package_name)
+    public function generateAdvancedPackage($package)
     {
-        $package_path = $package_folder.'/'.$vendor_name.'/'.$package_name;
-        $src_package_path = $package_path.'/src';
 
-        $number_sub_package = $this->ask('Quanti sotto pacchetti desideri crare?');
+        $package_path       = $package['package_folder'].'/'.$package['vendor_name'].'/'.$package['package_name'];
+        $src_package_path   = $package_path.'/src';
+
+        $number_sub_package = $this->ask($this->lang['ask4']);
 
         $spec_component = [];
         for($x = 1; $x <= $number_sub_package; $x++) {
-            $sub_package_name = $this->ask('Indicare nome sottopacchetto');
+            $sub_package_name = $this->ask($this->lang['ask5']);
 
             array_push($spec_component, $sub_package_name);
 
             //****************************************
             // Genero cartella sottopacchetto
             //****************************************
-            $this->helper->makeDir($src_package_path.'/'.ucfirst($sub_package_name));
+            if($this->helper->makeDir($src_package_path.'/'.ucfirst($sub_package_name)) === true)
+            {
+                //****************************************
+                // Genero componenti sottopacchetto
+                //****************************************
+                $package['sub_package_name'] = ucfirst($sub_package_name);
+                    $this->helper->generateAdvancedComponent($package);
+                unset($package['sub_package_name']);
 
-            //****************************************
-            // Genero componenti sottopacchetto
-            //****************************************
-            $sub_package_component = ['package_folder' => $package_folder, 'vendor_name' => $vendor_name, 'package_name' => $package_name, 'sub_package_name' => ucfirst($sub_package_name)];
-            $this->helper->generateComponent($sub_package_component, true);
-        } 
+            }else{
+                $this->warn($this->lang['warning3']);
+            }
+        }
+
+        $package['component'] = $spec_component;
 
         //****************************************
         // Genero phpspec suite file
         //****************************************
-        $this->helper->generateSpecSuite(['package_folder' => $package_folder, 'vendor_name' => $vendor_name, 'package_name' => $package_name, 'component' => $spec_component], true);
+        $this->helper->generateAdvancedSpecSuite($package);
 
         //****************************************
         // Genero composer
         //****************************************
-        $this->helper->generateComposer(['package_folder' => $package_folder, 'vendor_name' => $vendor_name, 'package_name' => $package_name, 'component' => $spec_component], true);
+        $this->helper->generateAdvancedComposer($package);
 
         return true;
     }
@@ -201,6 +214,13 @@ class NewPackage extends Command
     {
         $this->info("\n*************************");
         $this->info("***** Packageek *********");
+        $this->info("*************************\n");
+    }
+
+    public function getFinish()
+    {
+        $this->info("\n*************************");
+        $this->info("***** ".$this->lang['info1']." *****");
         $this->info("*************************\n");
     }
 
