@@ -146,11 +146,10 @@ class Helper
         {
             $spec = '';
             $n = count($package_component['component']);
-            echo $n;
             $i = 0;
             foreach ($package_component['component'] as $value) {
                 $i++;
-                $spec .= "           \"".$package_component['vendor_name']."\\\\".$package_component['package_name']."\\\\".$value."\": \"src/\"";
+                $spec .= "           \"".ucfirst($package_component['vendor_name'])."\\\\".ucfirst($package_component['package_name'])."\\\\".ucfirst($value)."\": \"src/\"";
                 if($i < $n)
                 {
                     $spec .= ",\n";

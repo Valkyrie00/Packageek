@@ -55,9 +55,10 @@ class NewPackage extends Command
                 //****************************************
                 // Creo cartella con il nome della root folder specificata
                 //****************************************
-                $this->helper->makeDir($package_folder);
-                $this->getVendor($package_folder);
-
+                if($this->helper->makeDir($package_folder) === true)
+                {
+                    $this->getVendor($package_folder);
+                }
             }
         }
     }
@@ -85,12 +86,13 @@ class NewPackage extends Command
             //****************************************
             // Creo cartella con il nome del vendor specificato
             //****************************************
-            $this->helper->makeDir($package_folder.'/'.$vendor_name);
-
-            //****************************************
-            // Passo alla creazione del pacchetto
-            //****************************************
-            $this->getPackage($package_folder, $vendor_name);
+            if($this->helper->makeDir($package_folder.'/'.$vendor_name) === true)
+            {
+                //****************************************
+                // Passo alla creazione del pacchetto
+                //****************************************
+                $this->getPackage($package_folder, $vendor_name);
+            }
         }
     }
 
@@ -105,12 +107,7 @@ class NewPackage extends Command
         // Controllo se esite la cartella del pacchetto
         //****************************************
         $check_package_name = $this->helper->fileExists($package_folder.'/'.$vendor_name.'/'.$package_name);
-        if($check_package_name === true)
-        {
-            //TODO: chiedo se sivuole creare un sottopacchetto all'interno di questo paccheddo
-
-        }
-        else
+        if($check_package_name === false)
         {
             //****************************************
             // Creo cartella con il nome del pacchetto specificato

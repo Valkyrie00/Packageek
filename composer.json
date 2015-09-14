@@ -1,6 +1,6 @@
 {
     "name": "valkyrie/packageek",
-    "description": "Cli for make packages",
+    "description": "A simple Cli for make packages",
     "license": "MIT",
     "authors": [
         {
