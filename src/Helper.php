@@ -306,5 +306,31 @@ class Helper
         return $status;
     }
 
+    //************************************
+    //********** EDIT ********************
+    //************************************
 
+    public function getVendorList($path)
+    {
+
+        return $this->file->directories($path);
+
+        //print_r( $this->file->files('./prova') );
+        //print_r( $this->file->allFiles('./prova') );
+
+    }
+
+    public function getPackageList($path)
+    {
+        return $this->file->directories($path);
+    }
+
+    public function cleanDirList($array){
+        $list = array();
+        foreach ($array as $value) {
+            $pieces = explode("/", $value);
+            $list[] = array_pop($pieces);
+        }
+        return $list;
+    }
 }

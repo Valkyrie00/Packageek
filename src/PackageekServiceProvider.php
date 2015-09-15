@@ -20,6 +20,7 @@ class PackageekServiceProvider extends ServiceProvider
      */
     protected $commands = [
         'Valkyrie\Packageek\NewPackage',
+        'Valkyrie\Packageek\EditPackage',
     ];
 
     /**
