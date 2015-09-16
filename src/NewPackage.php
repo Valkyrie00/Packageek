@@ -188,6 +188,14 @@ class NewPackage extends Command
                 //****************************************
                 $package['sub_package_name'] = ucfirst($sub_package_name);
                     $this->helper->generateAdvancedComponent($package);
+                    
+                    //Modifico app config
+                    $this->helper->addToAppProviders($package);
+
+                    $this->helper->addToAppComposer($package);
+
+                    $this->helper->addToAppAliases($package);
+
                 unset($package['sub_package_name']);
 
             }else{
@@ -219,6 +227,8 @@ class NewPackage extends Command
 
     public function getFinish()
     {
+        shell_exec('composer dump-autoload');
+        
         $this->info("\n*************************");
         $this->info("***** ".$this->lang['info1']." *****");
         $this->info("*************************\n");

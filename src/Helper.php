@@ -338,12 +338,47 @@ class Helper
         return $this->file->directories($path);
     }
 
-    public function cleanDirList($array){
+    public function cleanDirList($array)
+    {
         $list = array();
         foreach ($array as $value) {
             $pieces = explode("/", $value);
             $list[] = array_pop($pieces);
         }
         return $list;
+    }
+
+    public function addToAppProviders($package)
+    {
+        $provider = "        ".ucfirst($package['vendor_name'])."\\".ucfirst($package['package_name'])."\\".ucfirst($package['sub_package_name'])."\\".ucfirst($package['sub_package_name'])."ServiceProvider::class,";
+        $search = "'providers' => [";
+        $replace = $search."\n".$provider;
+
+        $config_app = $this->file->get('config/app.php');
+        $new_provider  = str_replace($search, $replace, $config_app);
+
+        $new_config_app = $this->file->put('config/app.php', $new_provider);
+    }
+
+    public function addToAppAliases($package)
+    {
+        $aliases = "        '".ucfirst($package['sub_package_name'])."'       => ".ucfirst($package['vendor_name'])."\\".ucfirst($package['package_name'])."\Facades\\".ucfirst($package['sub_package_name'])."::class,";
+        $search = "'aliases' => [";
+        $replace = $search."\n".$aliases;
+
+        $config_app = $this->file->get('config/app.php');
+        $new_aliases  = str_replace($search, $replace, $config_app);
+
+        $new_config_app = $this->file->put('config/app.php', $new_aliases);
+    }
+
+    public function addToAppComposer($package)
+    {
+        $composer = json_decode($this->file->get('composer.json'), true);
+        $composer['autoload']['psr-4'][ucfirst($package['vendor_name'])."\\".ucfirst($package['package_name'])."\\"] = $package['package_folder']."/".$package['vendor_name']."/".$package['package_name']."/src/";
+
+        $composer = json_encode($composer, JSON_PRETTY_PRINT);
+        $composer = str_replace('\/', '/', $composer);
+        $new_composer = $this->file->put('composer.json', $composer);
     }
 }
