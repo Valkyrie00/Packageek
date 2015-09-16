@@ -207,7 +207,7 @@ class NewPackage extends Command
                     //****************************************
                     $this->helper->addAdvancedToAppProviders($package);
                     $this->helper->addToAppComposer($package);
-                    $this->helper->addToAppAliases($package);
+                    $this->helper->addAdvancedToAppAliases($package);
 
                 unset($package['sub_package_name']);
 

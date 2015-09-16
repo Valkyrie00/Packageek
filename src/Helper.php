@@ -3,7 +3,6 @@
 namespace Valkyrie\Packageek;
 
 use RuntimeException;
-use GuzzleHttp\Client;
 use Illuminate\Filesystem\Filesystem as Filesystem;
 
 class Helper
