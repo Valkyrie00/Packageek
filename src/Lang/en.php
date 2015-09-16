@@ -14,6 +14,8 @@ return  [
 			'warning1' => 'Warning : Directory already exists!',
 			'warning2' => 'Warning : Vendor already exists!',
 			'warning3' => 'Warning : Error creating sub-package directory!',
+			'warning4' => 'Warning : Vendor not found!',
+			'warning5' => 'Warning : Directory not found!',
 
 			'info1' => 'Package created',
 		];

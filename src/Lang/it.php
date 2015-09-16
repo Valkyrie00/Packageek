@@ -14,6 +14,8 @@ return  [
 			'warning1' => 'Warning : Cartella già presente!',
 			'warning2' => 'Warning : Vendor già presente!',
 			'warning3' => 'Warning : Errore nella creazione della cartella del sottopacchetto!',
+			'warning4' => 'Warning : Vendor non trovato!',
+			'warning5' => 'Warning : Cartella non trovata!',
 
 			'info1' => 'Paccetto creato!',
 		];

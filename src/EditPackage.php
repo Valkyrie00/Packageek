@@ -24,7 +24,6 @@ class EditPackage extends Command
     public function handle()
     {
         $this->getBanner();
-        //die();
 
         //****************************************
         // Inizializzo cartella contenitore pacchetto
@@ -43,34 +42,90 @@ class EditPackage extends Command
                 //****************************************
                 $vendor_list = $this->helper->getVendorList($package_folder);
                 $vendor_list = $this->helper->cleanDirList($vendor_list);
+                
+                $table[] = $package_folder;
+                
 
                 if(count($vendor_list) >= 1){
-                    $this->table(array('Vendor'), array($vendor_list));
-                    
-                    $choice_vendor = $this->choice('quale vendor usare?', $vendor_list);
-                    $package_list = $this->helper->getPackageList($package_folder.'/'.$choice_vendor);
-                    
 
-                    /*$data = [
+                    $choice_vendor = $this->choice($this->lang['ask2'], $vendor_list);
+
+                    $table[] = $choice_vendor;
+                    $this->table(array('Directory','Vendor'), array($table));
+
+                    $package_list = $this->helper->getPackageList($package_folder.'/'.$choice_vendor);
+                    $package_list = $this->helper->cleanDirList($package_list);
+                    
+                    $choice_package = $this->choice($this->lang['ask3'], $package_list);
+                    $table[] = $choice_package;
+                    $this->table(array('Directory','Vendor','Package'), array($table));
+
+                    $data = [
                         'package_folder' => $package_folder,
                         'vendor_name'    => $choice_vendor,
-                        'package_name'   => $package_name
-                    ];*/
-                    //$sub_package_name = $this->ask('Indirare nome sottopacchetto');
-                    var_dump($package_list);
+                        'package_name'   => $choice_package
+                    ];
 
+                    if($this->generateAdvancedPackage($data) === true)
+                    {
+                        $this->getFinish();
+                    }
 
                 }else{
-                    echo 'nessun vendor trovato';
+                    $this->warn($this->lang['warning4']);
                 }
 
-
             }else{
-                $this->warn('cartella non presente');
+                $this->warn($this->lang['warning5']);
                 exit();
             }
         }
+    }
 
+
+    public function generateAdvancedPackage($package)
+    {
+        $package_path       = $package['package_folder'].'/'.$package['vendor_name'].'/'.$package['package_name'];
+        $src_package_path   = $package_path.'/src';
+
+        $number_sub_package = $this->ask($this->lang['ask4']);
+
+        $spec_component = [];
+        for($x = 1; $x <= $number_sub_package; $x++) {
+            $sub_package_name = $this->ask($this->lang['ask5']);
+
+            array_push($spec_component, $sub_package_name);
+
+            //****************************************
+            // Genero cartella sottopacchetto
+            //****************************************
+            if($this->helper->makeDir($src_package_path.'/'.ucfirst($sub_package_name)) === true)
+            {
+                //****************************************
+                // Genero componenti sottopacchetto
+                //****************************************
+                $package['sub_package_name'] = ucfirst($sub_package_name);
+                    $this->helper->generateAdvancedComponent($package);
+                unset($package['sub_package_name']);
+
+            }else{
+                $this->warn($this->lang['warning3']);
+            }
+        }
+
+        $package['component'] = $spec_component;
+
+        //****************************************
+        // Modifico phpspec suite file
+        //****************************************
+        $this->helper->generateAdvancedSpecSuite($package);
+
+        //****************************************
+        // Modifico composer file
+        //****************************************
+        $this->helper->editAdvancedComposer($package);
+
+        return true;
     }
 
     public function getBanner()

@@ -162,9 +162,13 @@ class Helper
     public function generateAdvancedSpecSuite($package)
     {
         $path_suite = $package['package_folder'].'/'.$package['vendor_name'].'/'.$package['package_name'].'/';
-        $this->makeDir($path_suite.'/test');
         $suite = $path_suite.'phpspec.yml';
-        $this->replaceAndSave(__DIR__.'/Structure/Advanced/Phpspec/base.stub', '', '', $suite);   
+
+        if($this->fileExists($path_suite.'/test') === false)
+        {
+            $this->makeDir($path_suite.'/test');
+            $this->replaceAndSave(__DIR__.'/Structure/Advanced/Phpspec/base.stub', '', '', $suite);
+        }
 
         foreach ($package['component'] as $v) {
 
@@ -272,6 +276,20 @@ class Helper
         $this->replaceAndSave(__DIR__.'/Structure/'.$structure.'/Composer.stub', $data_search, $data_replace, $composer);
     }
 
+    public function editAdvancedComposer($package)
+    {
+        $path     = $package['package_folder'].'/'.$package['vendor_name'].'/'.$package['package_name'].'/';
+        $composer = json_decode($this->file->get($path.'composer.json'), true);
+        foreach ($package['component'] as $value) {
+            $composer['autoload']['psr-0'][ucfirst($package['vendor_name'])."\\".ucfirst($package['package_name'])."\\".ucfirst($value)] = "src/";
+        }
+        $composer = json_encode($composer, JSON_PRETTY_PRINT);
+        $composer = str_replace('\/', '/', $composer);
+        $new_composer = $this->file->put($path.'composer.json', $composer);
+
+        return true;
+    }
+
     public function generateDirComponent($p)
     {
         $status = true;
@@ -312,12 +330,7 @@ class Helper
 
     public function getVendorList($path)
     {
-
         return $this->file->directories($path);
-
-        //print_r( $this->file->files('./prova') );
-        //print_r( $this->file->allFiles('./prova') );
-
     }
 
     public function getPackageList($path)
