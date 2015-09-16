@@ -28,7 +28,7 @@ class EditPackage extends Command
         //****************************************
         // Inizializzo cartella contenitore pacchetto
         //****************************************
-        $package_folder = $this->ask('Indicare cartella contenitore');
+        $package_folder = $this->ask($this->lang['ask1']);
         if($package_folder)
         {
             //****************************************
@@ -44,7 +44,6 @@ class EditPackage extends Command
                 $vendor_list = $this->helper->cleanDirList($vendor_list);
                 
                 $table[] = $package_folder;
-                
 
                 if(count($vendor_list) >= 1){
 
