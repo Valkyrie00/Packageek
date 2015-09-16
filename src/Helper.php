@@ -348,7 +348,19 @@ class Helper
         return $list;
     }
 
-    public function addToAppProviders($package)
+    public function addSimpleToAppProviders($package)
+    {
+        $provider = "        ".ucfirst($package['vendor_name'])."\\".ucfirst($package['package_name'])."\\".ucfirst($package['package_name'])."ServiceProvider::class,";
+        $search = "'providers' => [";
+        $replace = $search."\n".$provider;
+
+        $config_app = $this->file->get('config/app.php');
+        $new_provider  = str_replace($search, $replace, $config_app);
+
+        $new_config_app = $this->file->put('config/app.php', $new_provider);
+    }
+
+    public function addAdvancedToAppProviders($package)
     {
         $provider = "        ".ucfirst($package['vendor_name'])."\\".ucfirst($package['package_name'])."\\".ucfirst($package['sub_package_name'])."\\".ucfirst($package['sub_package_name'])."ServiceProvider::class,";
         $search = "'providers' => [";
@@ -359,8 +371,20 @@ class Helper
 
         $new_config_app = $this->file->put('config/app.php', $new_provider);
     }
+    
+    public function addSimpleToAppAliases($package)
+    {
+        $aliases = "        '".ucfirst($package['package_name'])."'       => ".ucfirst($package['vendor_name'])."\\".ucfirst($package['package_name'])."\Facades\\".ucfirst($package['package_name'])."::class,";
+        $search = "'aliases' => [";
+        $replace = $search."\n".$aliases;
 
-    public function addToAppAliases($package)
+        $config_app = $this->file->get('config/app.php');
+        $new_aliases  = str_replace($search, $replace, $config_app);
+
+        $new_config_app = $this->file->put('config/app.php', $new_aliases);
+    }
+
+    public function addAdvancedToAppAliases($package)
     {
         $aliases = "        '".ucfirst($package['sub_package_name'])."'       => ".ucfirst($package['vendor_name'])."\\".ucfirst($package['package_name'])."\Facades\\".ucfirst($package['sub_package_name'])."::class,";
         $search = "'aliases' => [";

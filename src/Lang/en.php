@@ -16,6 +16,7 @@ return  [
 			'warning3' => 'Warning : Error creating sub-package directory!',
 			'warning4' => 'Warning : Vendor not found!',
 			'warning5' => 'Warning : Directory not found!',
+			'warning6' => 'Warning : Character not allowed, please enter a number.',
 
 			'info1' => 'Package created',
 		];

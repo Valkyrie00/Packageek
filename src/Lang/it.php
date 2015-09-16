@@ -16,6 +16,7 @@ return  [
 			'warning3' => 'Warning : Errore nella creazione della cartella del sottopacchetto!',
 			'warning4' => 'Warning : Vendor non trovato!',
 			'warning5' => 'Warning : Cartella non trovata!',
+			'warning6' => 'Warning : Carattere non permesso, inserisci un numero.',
 
 			'info1' => 'Paccetto creato!',
 		];

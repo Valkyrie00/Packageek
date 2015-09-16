@@ -105,6 +105,13 @@ class EditPackage extends Command
                 //****************************************
                 $package['sub_package_name'] = ucfirst($sub_package_name);
                     $this->helper->generateAdvancedComponent($package);
+
+                    //****************************************
+                    // Autoload package
+                    //****************************************
+                    $this->helper->addAdvancedToAppProviders($package);
+                    $this->helper->addAdvancedToAppAliases($package);
+
                 unset($package['sub_package_name']);
 
             }else{
@@ -136,6 +143,8 @@ class EditPackage extends Command
 
     public function getFinish()
     {
+        shell_exec('composer dump-autoload');
+
         $this->info("\n*************************");
         $this->info("***** ".$this->lang['info1']." *****");
         $this->info("*************************\n");

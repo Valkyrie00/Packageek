@@ -161,6 +161,13 @@ class NewPackage extends Command
         //****************************************
         $this->helper->generateSimpleSpecSuite($package);
 
+        //****************************************
+        // Autoload package
+        //****************************************
+        $this->helper->addSimpleToAppProviders($package);
+        $this->helper->addToAppComposer($package);
+        $this->helper->addSimpleToAppAliases($package);
+
         return true;
     }
 
@@ -171,6 +178,12 @@ class NewPackage extends Command
         $src_package_path   = $package_path.'/src';
 
         $number_sub_package = $this->ask($this->lang['ask4']);
+
+        if(is_numeric($number_sub_package) === false)
+        {
+            $this->warn($this->lang['warning6']);
+            $this->generateAdvancedPackage($package);
+        }
 
         $spec_component = [];
         for($x = 1; $x <= $number_sub_package; $x++) {
@@ -189,11 +202,11 @@ class NewPackage extends Command
                 $package['sub_package_name'] = ucfirst($sub_package_name);
                     $this->helper->generateAdvancedComponent($package);
                     
-                    //Modifico app config
-                    $this->helper->addToAppProviders($package);
-
+                    //****************************************
+                    // Autoload package
+                    //****************************************
+                    $this->helper->addAdvancedToAppProviders($package);
                     $this->helper->addToAppComposer($package);
-
                     $this->helper->addToAppAliases($package);
 
                 unset($package['sub_package_name']);
