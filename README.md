@@ -9,8 +9,8 @@ composer require valkyrie/packageek
 ```
 
 You must also install this service provider.
-**Laravel 5**
 
+**Laravel 5**
 ```php
 
 //config/app.php
