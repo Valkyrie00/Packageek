@@ -9,14 +9,15 @@ composer require valkyrie/packageek
 ```
 
 You must also install this service provider.
+**Laravel 5**
 
 ```php
 
-// config/app.php
+//config/app.php
 
 'providers' => [
     ...
-    'Spatie\Backup\BackupServiceProvider',
+    Valkyrie\Packageek\PackageekServiceProvider::class,
     ...
 ];
 ```
